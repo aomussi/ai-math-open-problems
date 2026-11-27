@@ -25,10 +25,10 @@ private theorem mapped_comparable {n : ℕ} {S : Finset (Fin 3 → Fin n)}
   · exact Or.inl ⟨i, j, hij, hi, hj⟩
   · exact Or.inr ⟨i, j, hij, hi, hj⟩
 
-/-- Ben Green's Problem 88. The exponent saving is uniform over all sizes and sets. -/
-theorem green_88 :
-    ∃ δ > (0 : ℝ), ∀ (N : ℕ) (S : Finset (Fin 3 → Fin N)),
-      PairwiseComparable S → (S.card : ℝ) ≤ (N : ℝ) ^ (2 - δ) := by
+/-- The power bound with coefficient one for rectangular grids. -/
+theorem rectangular_exponent :
+    ∃ θ : ℝ, 1 / 2 ≤ θ ∧ θ < 2 / 3 ∧ ∀ r (S : Finset (Fin 3 → ℕ)),
+      PairwiseComparable S → InRectangle r S → (S.card : ℝ) ≤ (volume r : ℝ) ^ θ := by
   classical
   let μ : ℝ := eta / (96 * (groupSize : ℝ))
   have hL : (0 : ℝ) < groupSize := by exact_mod_cast groupSize_pos
@@ -48,19 +48,27 @@ theorem green_88 :
         mul_le_mul_of_nonneg_left (Nat.floor_le (by positivity)) (by positivity)
       _ = _ := by dsimp [μ]; field_simp; ring
   obtain ⟨θ, hθ, hθ', hpow⟩ := exists_exponent hLk
-  refine ⟨2 - 3 * θ, by linarith, remove_prefactor (C := 2) ?_⟩
+  exact ⟨θ, hθ, hθ', remove_rectangular_prefactor (rectangular hk hθ hθ' hpow hC hCsmall)⟩
+
+/-- Ben Green's Problem 88. The exponent saving is uniform over all sizes and sets. -/
+theorem green_88 :
+    ∃ δ > (0 : ℝ), ∀ (N : ℕ) (S : Finset (Fin 3 → Fin N)),
+      PairwiseComparable S → (S.card : ℝ) ≤ (N : ℝ) ^ (2 - δ) := by
+  obtain ⟨θ, _, hθ', hbound⟩ := rectangular_exponent
+  refine ⟨2 - 3 * θ, by linarith, ?_⟩
   intro n S hS
   let T := S.map (castTriple n)
   have hRect : InRectangle (fun _ => n) T := by
     intro x hx i
     obtain ⟨z, _, rfl⟩ := Finset.mem_map.mp hx
     exact (z i).isLt
-  have h := rectangular hk hθ hθ' hpow hC hCsmall _ T (mapped_comparable hS) hRect
-  change ((S.map (castTriple n)).card : ℝ) ≤ 2 * (volume (fun _ => n) : ℝ) ^ θ at h
+  have h := hbound _ T (mapped_comparable hS) hRect
+  change ((S.map (castTriple n)).card : ℝ) ≤ (volume (fun _ => n) : ℝ) ^ θ at h
   rw [Finset.card_map, volume_cast, Finset.prod_const, Finset.card_univ, Fintype.card_fin,
     ← Real.rpow_natCast_mul (Nat.cast_nonneg n), Nat.cast_ofNat] at h
   simpa only [show 2 - (2 - 3 * θ) = 3 * θ by ring] using h
 
+#print axioms rectangular_exponent
 #print axioms green_88
 
 end Green88

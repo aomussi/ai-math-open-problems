@@ -1,7 +1,13 @@
 import Green88.Basic
 import Mathlib.Data.Finset.Sort
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 
 namespace Green88
+
+open scoped BigOperators
+
+/-- Number of grid points in a rectangle with side lengths r. -/
+def volume (r : Fin 3 → ℕ) : ℕ := ∏ i, r i
 
 /-- Points in the zero-based rectangular box with side lengths `r`. -/
 def InRectangle (r : Fin 3 → ℕ) (S : Finset (Fin 3 → ℕ)) : Prop :=

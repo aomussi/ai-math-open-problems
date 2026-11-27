@@ -5,8 +5,6 @@ namespace Green88
 
 open scoped BigOperators
 
-def volume (r : Fin 3 → ℕ) : ℕ := ∏ i, r i
-
 theorem volume_cast (r : Fin 3 → ℕ) : (volume r : ℝ) = ∏ i, (r i : ℝ) := by
   simp [volume]
 

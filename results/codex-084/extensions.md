@@ -32,6 +32,8 @@ For the modular problem, split each residue axis into two consecutive intervals 
 
 ## Higher-dimensional grids
 
+[Lean 4 proof and axiom audit](lean/Green88/HigherDimension.lean) · [Build and verification commands](lean/README.md).
+
 Let $G_{q,r}(N)$ be the largest size of a subset of $[N]^q$ in which each pair has at least $r$ strict coordinate comparisons in one common direction. For every $2\le r<q$,
 
 $$
@@ -45,6 +47,8 @@ For $r\ge3$, a fixed power saving already follows from [Fox, Sudakov and Wigders
 By the [correspondence with pod packings](https://arxiv.org/html/2512.10438v2#S1.SS2), the upper bound gives density $O_{q,r}(N^{-\delta})$ for packings by aligned $(q,r)$-pods of side length $N$. A pod consists of the vectors in $\{0,\ldots,N-1\}^q$ with at most $r-1$ positive coordinates and has $O_{q,r}(N^{r-1})$ points. For anchors in one $N$-box, their translates intersect exactly when the coordinatewise maximum of the anchors lies in both pods, equivalently when the anchors are not $r$-comparable. Partition the anchor lattice into $N$-boxes and apply the bound in each box. For $q=3,r=2$ this is the tripod density bound. The same grid theorem bounds the number of filled cells in the [monotone partial matrices of Aronov, Dujmović and Morin](https://arxiv.org/html/1706.10193#S4.SS3), by mapping a filled cell to its column, row and label.
 
 ## Color-avoiding paths under an acyclicity assumption
+
+[Lean 4 proof and axiom audit](lean/Green88/ColorAvoiding.lean) · [Build and verification commands](lean/README.md).
 
 In a three-colored tournament of order $m$, write $D_i$ for the spanning digraph of edges outside color $i$, and $L_i$ for the maximum number of vertices in a simple directed path in $D_i$.
 

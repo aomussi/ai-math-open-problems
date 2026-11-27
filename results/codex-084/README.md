@@ -22,7 +22,9 @@ Mathlib's triangle removal lemma, the rectangular induction, and
 removal of the leading constant. The theorem
 [`Green88.modular_exact`](lean/Green88/Modular.lean) proves the sharp
 modular bound and its attainment for every positive odd modulus. The
-project pins Lean 4.19.0 and Mathlib v4.19.0.
+project also checks the [higher-dimensional reduction and bound](lean/Green88/HigherDimension.lean)
+and the [color-avoiding path equivalence and bounds](lean/Green88/ColorAvoiding.lean).
+It pins Lean 4.19.0 and Mathlib v4.19.0.
 
 ## Rectangular induction
 
