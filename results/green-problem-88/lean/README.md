@@ -38,7 +38,7 @@ This project pins Lean 4.19.0 and Mathlib v4.19.0. With Elan and Git
 installed, run the following from the repository root.
 
 ```sh
-cd results/codex-084/lean
+cd results/green-problem-88/lean
 lake build Green88
 lake env lean Green88/Theorem.lean
 lake env lean Green88/Modular.lean
