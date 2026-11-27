@@ -1,0 +1,12 @@
+{
+  "verified": true,
+  "coefficient": "9/5",
+  "reachable_states": 1063,
+  "nonterminal_painter_branches": 1408,
+  "initial_potential": 0,
+  "potential_min": 0,
+  "potential_max": 34,
+  "smallest_slack": 0,
+  "largest_slack": 4,
+  "inequality": "5 * cost - 9 * added_vertices <= potential_before - potential_after"
+}

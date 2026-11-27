@@ -1,0 +1,10 @@
+{
+  "counter_signatures": 69,
+  "P_background_edges": 187540,
+  "P_D_options": 47200,
+  "P_E_options": 66885,
+  "N_nonempty_antichains": 10224,
+  "empty_backgrounds": 69,
+  "background_antichains": 2577,
+  "seconds": 0.116
+}

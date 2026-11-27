@@ -1,0 +1,9 @@
+ACTION SYSTEM: commuting, all664states reachable, representatives consistent
+COUNTER COVER: independent0..12canonicalization proved UNSAT;69signatures
+ORIGINAL MOVES: 30 background heap types, 10 D options, 15 E options
+P-CONDITION: passed 121512 context-option checks acrossall69signatures
+closure 1000 front 2099 queue 1508 sec 1.428
+closure 2000 front 2741 queue 1310 sec 1.926
+closure 3000 front 2577 queue 56 sec 2.48
+UNIVERSAL RECURRENCE VERIFIED
+{"background_states": 664, "counter_signatures": 69, "p_context_option_checks": 121512, "processed": 3039, "antichain_size": 2577, "insertions": 5200, "discarded_supersets": 2623, "seconds": 2.4987199999995937, "terminal_exception_separate": true, "original_physical_heaps": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32], "coverage": "independent0..12canonicalization, SMT UNSAT"}

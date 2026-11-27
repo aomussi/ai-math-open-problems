@@ -1,0 +1,6 @@
+progress 1000 retained 2099 queued 1507 seconds 1.2
+progress 2000 retained 2741 queued 1309 seconds 1.61
+progress 3000 retained 2577 queued 55 seconds 1.93
+{"states": 664, "processed": 3038, "inserted": 5200, "retained": 2577} seconds 2.916
+ALL ORIGINAL MOVE CONDITIONS PASSED {"counter_signatures": 69, "P_background_edges": 187540, "P_D_options": 47200, "P_E_options": 66885, "N_nonempty_antichains": 10224, "empty_backgrounds": 69, "background_antichains": 2577, "seconds": 0.396}
+H25 THRESHOLD ROWS PASSED; see ../README.md for the all-integer deduction.

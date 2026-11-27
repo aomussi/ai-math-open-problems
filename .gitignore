@@ -1,0 +1,7 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+/release-assets/
+/results/codex-007/verify
+/results/codex-007/certificate/verify-original

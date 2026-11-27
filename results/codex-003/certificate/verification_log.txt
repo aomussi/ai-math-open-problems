@@ -1,0 +1,15 @@
+G_n (n = 2 mod 4)
+Certified case 0 epsilon 0 for every integer u >= 622
+Certified case 0 epsilon 1 for every integer u >= 622
+Certified case 1 epsilon 0 for every integer u >= 622
+Certified case 1 epsilon 1 for every integer u >= 622
+Certified G_n: four transversals with empty intersection for every n>10000, n=2 mod4.
+H_n (n = 4 mod 8)
+Certified transversal omitting special row 1
+Certified transversal omitting special row 6
+Certified transversal omitting special row 11
+Certified empty intersection for every integer t >= 1250
+Equivalently, every n > 10000 with n congruent to 4 modulo 8.
+H_n (n = 0 mod 8)
+Verified all even k >=2502: three transversals of H_(4k) with empty common intersection.
+PASS: every even n > 10000 is covered; every cell is avoided by a transversal.
