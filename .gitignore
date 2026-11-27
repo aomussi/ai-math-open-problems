@@ -3,5 +3,5 @@ __pycache__/
 *.pyc
 .venv/
 /release-assets/
-/results/codex-007/verify
-/results/codex-007/certificate/verify-original
+/results/kotzig-nim-3-5/verify
+/results/kotzig-nim-3-5/certificate/verify-original
