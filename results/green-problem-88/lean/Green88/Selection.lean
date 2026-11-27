@@ -104,10 +104,26 @@ def IsMarked {α β : Type*} (S : Finset (Fin 3 → α))
     (bin : Fin 3 → α → β) (sample : Fin 3 → β → α) (e : Fin 3 → β) : Prop :=
   ∀ i : Fin 3, ∃ p ∈ S, (∀ j : Fin 3, bin j (p j) = e j) ∧ p i = sample i (e i)
 
-/-- Marked boxes sharing just one coarse coordinate inherit comparability. -/
-theorem marked_comparable {α β : Type*} [LinearOrder α] [LinearOrder β]
+/-- After fixing a fine coordinate, the other two coarse coordinates form a weak chain. -/
+def SectionChains {α β : Type*} [LE β] (S : Finset (Fin 3 → α))
+    (bin : Fin 3 → α → β) : Prop :=
+  ∀ x ∈ S, ∀ y ∈ S, ∀ i j k : Fin 3, j ≠ k → i ≠ j → i ≠ k → x i = y i →
+    (bin j (x j) ≤ bin j (y j) ∧ bin k (x k) ≤ bin k (y k)) ∨
+    (bin j (y j) ≤ bin j (x j) ∧ bin k (y k) ≤ bin k (x k))
+
+theorem sectionChains_of_comparable {α β : Type*} [LinearOrder α] [LinearOrder β]
     {S : Finset (Fin 3 → α)} (hS : PairwiseComparable S)
-    {bin : Fin 3 → α → β} (hbin : ∀ i, Monotone (bin i))
+    {bin : Fin 3 → α → β} (hbin : ∀ i, Monotone (bin i)) : SectionChains S bin := by
+  intro x hx y hy i j k hjk hij hik hi
+  by_cases he : x = y
+  · subst y
+    exact Or.inl ⟨le_rfl, le_rfl⟩
+  exact (section_chain hjk hij hik hi (hS hx hy he)).imp
+    (fun h => ⟨hbin j h.1.le, hbin k h.2.le⟩) (fun h => ⟨hbin j h.1.le, hbin k h.2.le⟩)
+
+/-- Marked boxes sharing just one coarse coordinate inherit comparability. -/
+theorem marked_comparable_of_sections {α β : Type*} [LinearOrder α] [LinearOrder β]
+    {S : Finset (Fin 3 → α)} {bin : Fin 3 → α → β} (hS : SectionChains S bin)
     {sample : Fin 3 → β → α} {e f : Fin 3 → β}
     (he : IsMarked S bin sample e) (hf : IsMarked S bin sample f)
     (i : Fin 3) (hi : e i = f i)
@@ -118,23 +134,26 @@ theorem marked_comparable {α β : Type*} [LinearOrder α] [LinearOrder β]
   have heq : p i = q i := hpi.trans ((congrArg (sample i) hi).trans hqi.symm)
   obtain ⟨j, k, hjk, hij, hik⟩ : ∃ j k : Fin 3, j ≠ k ∧ i ≠ j ∧ i ≠ k := by
     fin_cases i <;> decide
-  have hpq : p ≠ q := by
-    intro eq
-    exact hne j hij.symm ((hpe j).symm.trans (eq ▸ hqf j))
-  have lift (j : Fin 3) (h : p j < q j) (hn : e j ≠ f j) : e j < f j := by
-    apply lt_of_le_of_ne _ hn
-    simpa only [hpe, hqf] using hbin j h.le
-  have lift' (j : Fin 3) (h : q j < p j) (hn : f j ≠ e j) : f j < e j := by
-    apply lt_of_le_of_ne _ hn
-    simpa only [hpe, hqf] using hbin j h.le
-  rcases section_chain hjk hij hik heq (hS hp hq hpq) with h | h
-  · exact Or.inl ⟨j, k, hjk, lift j h.1 (hne j hij.symm), lift k h.2 (hne k hik.symm)⟩
-  · exact Or.inr ⟨j, k, hjk, lift' j h.1 (hne j hij.symm).symm, lift' k h.2 (hne k hik.symm).symm⟩
+  have h := hS p hp q hq i j k hjk hij hik heq
+  simp only [hpe, hqf] at h
+  rcases h with h | h
+  · exact Or.inl ⟨j, k, hjk, lt_of_le_of_ne h.1 (hne j hij.symm),
+      lt_of_le_of_ne h.2 (hne k hik.symm)⟩
+  · exact Or.inr ⟨j, k, hjk, lt_of_le_of_ne h.1 (hne j hij.symm).symm,
+      lt_of_le_of_ne h.2 (hne k hik.symm).symm⟩
 
-/-- Each sample marks at most three times the line bound times the coarse extremal bound. -/
-theorem marked_card_bound {α β : Type*} [LinearOrder α] [LinearOrder β] [DecidableEq β] {L C : ℕ}
+theorem marked_comparable {α β : Type*} [LinearOrder α] [LinearOrder β]
     {S : Finset (Fin 3 → α)} (hS : PairwiseComparable S)
     {bin : Fin 3 → α → β} (hbin : ∀ i, Monotone (bin i))
+    {sample : Fin 3 → β → α} {e f : Fin 3 → β}
+    (he : IsMarked S bin sample e) (hf : IsMarked S bin sample f)
+    (i : Fin 3) (hi : e i = f i)
+    (hne : ∀ j : Fin 3, j ≠ i → e j ≠ f j) : Comparable e f :=
+  marked_comparable_of_sections (sectionChains_of_comparable hS hbin) he hf i hi hne
+
+/-- Each sample marks at most three times the line bound times the coarse extremal bound. -/
+theorem marked_card_bound_of_sections {α β : Type*} [LinearOrder α] [LinearOrder β] [DecidableEq β] {L C : ℕ}
+    {S : Finset (Fin 3 → α)} {bin : Fin 3 → α → β} (hS : SectionChains S bin)
     {E R : Finset (Fin 3 → β)} (hsub : E ⊆ R)
     (hR : ∀ x ∈ R, ∀ i, (line R x i).card ≤ L)
     (hC : ∀ T : Finset (Fin 3 → β), PairwiseComparable T → T.card ≤ C)
@@ -149,8 +168,19 @@ theorem marked_card_bound {α β : Type*} [LinearOrder α] [LinearOrder β] [Dec
   have hone (x : Fin 3 → β) (hx : x ∈ E) (y : Fin 3 → β) (hy : y ∈ E)
       (i : Fin 3) (he : x i = y i) (hn : ∀ j : Fin 3, j ≠ i → x j ≠ y j) :
       Comparable x y :=
-    marked_comparable hS hbin (hmark x hx) (hmark y hy) i he hn
+    marked_comparable_of_sections hS (hmark x hx) (hmark y hy) i he hn
   obtain ⟨T, -, hT, hcard⟩ := select_comparable L E hline hone
   exact hcard.trans (Nat.mul_le_mul_left _ (hC T hT))
+
+
+theorem marked_card_bound {α β : Type*} [LinearOrder α] [LinearOrder β] [DecidableEq β] {L C : ℕ}
+    {S : Finset (Fin 3 → α)} (hS : PairwiseComparable S)
+    {bin : Fin 3 → α → β} (hbin : ∀ i, Monotone (bin i))
+    {E R : Finset (Fin 3 → β)} (hsub : E ⊆ R)
+    (hR : ∀ x ∈ R, ∀ i, (line R x i).card ≤ L)
+    (hC : ∀ T : Finset (Fin 3 → β), PairwiseComparable T → T.card ≤ C)
+    {sample : Fin 3 → β → α} (hmark : ∀ x ∈ E, IsMarked S bin sample x) :
+    E.card ≤ 3 * L * C :=
+  marked_card_bound_of_sections (sectionChains_of_comparable hS hbin) hsub hR hC hmark
 
 end Green88

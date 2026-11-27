@@ -26,10 +26,10 @@ theorem loopless (a : V) : ¬ T.edge a a := fun h => T.asymm a a h h
 /-- Longest simple color-avoiding path, counted in vertices. -/
 noncomputable def pathLength [Fintype V] (i : Fin 3) : ℕ := DirectedPath.longest (T.avoid i)
 
-private def recolor (e : Fin 3 ≃ Fin 3) : ColoredTournament V :=
+def recolor (e : Fin 3 ≃ Fin 3) : ColoredTournament V :=
   ⟨T.edge, fun a b => e (T.color a b), T.total, T.asymm⟩
 
-private theorem avoid_recolor (e : Fin 3 ≃ Fin 3) (i : Fin 3) :
+theorem avoid_recolor (e : Fin 3 ≃ Fin 3) (i : Fin 3) :
     (T.recolor e).avoid i = T.avoid (e.symm i) := by
   funext a b
   apply propext
@@ -51,7 +51,7 @@ private theorem pairwise_direction {R : V → V → Prop} {l : List V}
           exact Or.inr (hv _ haTail)
         · exact ih hl haTail hbTail
 
-private theorem comparable_from_sections (x y : Fin 3 → ℕ)
+theorem comparable_from_sections (x y : Fin 3 → ℕ)
     (h0 : x 0 = y 0 → (x 1 < y 1 ∧ x 2 < y 2) ∨ (y 1 < x 1 ∧ y 2 < x 2))
     (h1 : x 1 = y 1 → (x 0 < y 0 ∧ x 2 < y 2) ∨ (y 0 < x 0 ∧ y 2 < x 2))
     (h2 : x 2 = y 2 → (x 0 < y 0 ∧ x 1 < y 1) ∨ (y 0 < x 0 ∧ y 1 < x 1)) :
@@ -75,6 +75,58 @@ private theorem comparable_from_sections (x y : Fin 3 → ℕ)
     | exact Or.inr ⟨0, 2, by decide, e0, e2⟩
     | exact Or.inr ⟨1, 2, by decide, e1, e2⟩
 
+/-- The edges of one directed Hamilton path per level. -/
+theorem level_paths [Fintype V] (f : V → ℕ) :
+    ∃ P : V → V → Prop, Acyclic P ∧
+      (∀ a b, P a b → T.edge a b ∧ f a = f b) ∧
+      ∀ a b, a ≠ b → f a = f b → TransGen P a b ∨ TransGen P b a := by
+  classical
+  let level (k : ℕ) := Finset.univ.filter fun v : V => f v = k
+  have pathsExist (k : ℕ) : ∃ l : List V, DirectedPath T.edge l ∧ ∀ v, v ∈ l ↔ f v = k := by
+    obtain ⟨l, hl, hm⟩ := hamilton_path (level k) (fun a _ b _ => T.total a b)
+    exact ⟨l, hl, fun a => (hm a).trans (by simp [level])⟩
+  choose paths hp using pathsExist
+  let P (a b : V) : Prop := ∃ (k j : ℕ) (hj : j < (paths k).length - 1),
+    (paths k).get ⟨j, by omega⟩ = a ∧ (paths k).get ⟨j + 1, by omega⟩ = b
+  let rank (a : V) := (paths (f a)).idxOf a
+  have edgeData (a b : V) (h : P a b) : T.edge a b ∧ f a = f b ∧ rank a < rank b := by
+    obtain ⟨k, j, hj, ea, eb⟩ := h
+    have fa := (hp k).2 a |>.mp (ea ▸ List.get_mem ..)
+    have fb := (hp k).2 b |>.mp (eb ▸ List.get_mem ..)
+    have edge := List.chain'_iff_get.mp (hp k).1.2 j hj
+    rw [ea, eb] at edge
+    refine ⟨edge, fa.trans fb.symm, ?_⟩
+    change (paths (f a)).idxOf a < (paths (f b)).idxOf b
+    rw [fa, fb, ← ea, ← eb]
+    simp only [List.get_eq_getElem, List.idxOf_getElem (hp k).1.1]
+    omega
+  refine ⟨P, acyclic_of_increasing (f := rank) fun a b h => (edgeData a b h).2.2,
+    fun a b h => ⟨(edgeData a b h).1, (edgeData a b h).2.1⟩, ?_⟩
+  intro a b hne he
+  have chain : (paths (f a)).Chain' P :=
+    List.chain'_iff_get.mpr fun j hj => ⟨f a, j, hj, rfl, rfl⟩
+  have pairs := List.chain'_iff_pairwise.mp (chain.imp fun _ _ h => TransGen.single h)
+  exact pairwise_direction pairs ((hp _).2 a |>.mpr rfl) ((hp _).2 b |>.mpr he.symm) hne
+
+theorem acyclic_across_levels {α : Type*} [Preorder α] {f : V → α} {P Q : V → V → Prop}
+    (hP : Acyclic P) (hflat : ∀ a b, P a b → f a = f b)
+    (hup : ∀ a b, Q a b → f a < f b) : Acyclic (fun a b => P a b ∨ Q a b) := by
+  have reduce {a b : V} (hr : TransGen (fun a b => P a b ∨ Q a b) a b) :
+      (TransGen P a b ∧ f a = f b) ∨ f a < f b := by
+    induction hr with
+    | single h =>
+      rcases h with h | h
+      · exact Or.inl ⟨TransGen.single h, hflat _ _ h⟩
+      · exact Or.inr (hup _ _ h)
+    | tail _ h ih =>
+      rcases ih with ⟨hp, he⟩ | hlt <;> rcases h with h | h
+      · exact Or.inl ⟨hp.tail h, he.trans (hflat _ _ h)⟩
+      · exact Or.inr (he.le.trans_lt (hup _ _ h))
+      · exact Or.inr (hlt.trans_le (hflat _ _ h).le)
+      · exact Or.inr (hlt.trans (hup _ _ h))
+  intro a h
+  exact (reduce h).elim (fun h => hP a h.1) (lt_irrefl _)
+
 private theorem label_zero [Fintype V] (ha : Acyclic (T.avoid 0)) {n : Fin 3 → ℕ}
     (hb : ∀ i, PathBound (T.avoid i) (n i)) :
     ∃ f : V → Fin 3 → ℕ, (∀ a b, a ≠ b → Comparable (f a) (f b)) ∧
@@ -86,40 +138,10 @@ private theorem label_zero [Fintype V] (ha : Acyclic (T.avoid 0)) {n : Fin 3 →
     apply Classical.byContradiction
     intro hn
     exact (ne_of_lt (inc0 a b ⟨he, hn⟩)) hh
-  let levels (k : ℕ) := Finset.univ.filter fun a : V => h0 a = k
-  have hamilton (k : ℕ) :
-      ∃ l : List V, DirectedPath T.edge l ∧ ∀ a, a ∈ l ↔ h0 a = k := by
-    obtain ⟨l, hl, hm⟩ := hamilton_path (levels k) (fun a _ b _ => T.total a b)
-    exact ⟨l, hl, fun a => (hm a).trans (by simp [levels])⟩
-  choose paths hp using hamilton
-  let P (a b : V) : Prop :=
-    ∃ (k j : ℕ) (hj : j < (paths k).length - 1),
-      (paths k).get ⟨j, by omega⟩ = a ∧ (paths k).get ⟨j + 1, by omega⟩ = b
-  have path_levels {a b : V} (h : P a b) : h0 a = h0 b := by
-    obtain ⟨k, _, _, h1, h2⟩ := h
-    have e1 := (hp k).2 a |>.mp (h1 ▸ List.get_mem ..)
-    have e2 := (hp k).2 b |>.mp (h2 ▸ List.get_mem ..)
-    exact e1.trans e2.symm
-  have path_edge {a b : V} (h : P a b) : T.edge a b ∧ T.color a b = 0 := by
-    obtain ⟨k, j, hj, e1, e2⟩ := h
-    have he := List.chain'_iff_get.mp (hp k).1.2 j hj
-    rw [e1, e2] at he
-    exact ⟨he, color0 he (path_levels ⟨k, j, hj, e1, e2⟩)⟩
-  let rank (a : V) := (paths (h0 a)).idxOf a
-  have path_rank {a b : V} (h : P a b) : rank a < rank b := by
-    obtain ⟨k, j, hj, e1, e2⟩ := h
-    have h1 := (hp k).2 a |>.mp (e1 ▸ List.get_mem ..)
-    have h2 := (hp k).2 b |>.mp (e2 ▸ List.get_mem ..)
-    change (paths (h0 a)).idxOf a < (paths (h0 b)).idxOf b
-    rw [h1, h2, ← e1, ← e2]
-    simp only [List.get_eq_getElem, List.idxOf_getElem (hp k).1.1]
-    omega
-  have path_total {a b : V} (hne : a ≠ b) (he : h0 a = h0 b) :
-      TransGen P a b ∨ TransGen P b a := by
-    have chain : (paths (h0 a)).Chain' P :=
-      List.chain'_iff_get.mpr fun j hj => ⟨h0 a, j, hj, rfl, rfl⟩
-    have pairs := List.chain'_iff_pairwise.mp (chain.imp fun _ _ h => TransGen.single h)
-    exact pairwise_direction pairs ((hp _).2 a |>.mpr rfl) ((hp _).2 b |>.mpr he.symm) hne
+  obtain ⟨P, hPacyclic, hPedge, hPtotal⟩ := T.level_paths h0
+  have path_levels {a b : V} (h : P a b) : h0 a = h0 b := (hPedge a b h).2
+  have path_edge {a b : V} (h : P a b) : T.edge a b ∧ T.color a b = 0 :=
+    ⟨(hPedge a b h).1, color0 (hPedge a b h).1 (path_levels h)⟩
   let first (a b : V) := P a b ∨ T.edge a b ∧ T.color a b = 2
   have first_sub : first ≤ T.avoid 1 := by
     intro a b h
@@ -127,27 +149,9 @@ private theorem label_zero [Fintype V] (ha : Acyclic (T.avoid 0)) {n : Fin 3 →
     · obtain ⟨he, hc⟩ := path_edge h
       exact ⟨he, hc.trans_ne (by decide)⟩
     · exact ⟨he, hc.trans_ne (by decide)⟩
-  have first_acyclic : Acyclic first := by
-    have edge_lex {a b : V} (e : first a b) :
-        h0 a < h0 b ∨ h0 a = h0 b ∧ rank a < rank b := by
-      rcases e with he | ⟨he, hc⟩
-      · exact Or.inr ⟨path_levels he, path_rank he⟩
-      · exact Or.inl (inc0 _ _ ⟨he, hc.trans_ne (by decide)⟩)
-    have reach_lex {a b : V} (e : TransGen first a b) :
-        h0 a < h0 b ∨ h0 a = h0 b ∧ rank a < rank b := by
-      induction e with
-      | single e => exact edge_lex e
-      | tail _ e ih =>
-          rcases ih with h | ⟨h, hr⟩ <;>
-            rcases edge_lex e with g | ⟨g, gr⟩
-          · exact Or.inl (h.trans g)
-          · exact Or.inl (h.trans_le g.le)
-          · exact Or.inl (h.le.trans_lt g)
-          · exact Or.inr ⟨h.trans g, hr.trans gr⟩
-    intro v hv
-    rcases reach_lex hv with h | ⟨_, h⟩
-    · exact lt_irrefl _ h
-    · exact lt_irrefl _ h
+  have first_acyclic : Acyclic first :=
+    acyclic_across_levels (f := h0) hPacyclic (fun a b h => path_levels h)
+      (fun a b h => inc0 a b ⟨h.1, h.2.trans_ne (by decide)⟩)
   obtain ⟨H1, first_H1, H1_sub, H1_acyclic, H1_max⟩ :=
     extend_acyclic first_sub first_acyclic (fun v h => T.loopless v h.1)
   let h1 := height H1
@@ -202,7 +206,7 @@ private theorem label_zero [Fintype V] (ha : Acyclic (T.avoid 0)) {n : Fin 3 →
   have comp (a b : V) (hne : a ≠ b) : Comparable (heights a) (heights b) := by
     apply comparable_from_sections
     · intro hh
-      rcases path_total hne hh with h | h
+      rcases hPtotal a b hne hh with h | h
       · exact Or.inl ⟨reach_lt inc1 (h.mono P_H1), reach_lt inc2 (h.mono P_H2)⟩
       · exact Or.inr ⟨reach_lt inc1 (h.mono P_H1), reach_lt inc2 (h.mono P_H2)⟩
     · intro hh
@@ -331,7 +335,7 @@ theorem grid_equivalence (m : ℕ) (n : Fin 3 → ℕ) :
 /-- Maximum of the three longest color-avoiding path lengths. -/
 noncomputable def maxPathLength [Fintype V] : ℕ := Finset.univ.sup T.pathLength
 
-private theorem pathLength_le_max [Fintype V] (i : Fin 3) : T.pathLength i ≤ T.maxPathLength :=
+theorem pathLength_le_max [Fintype V] (i : Fin 3) : T.pathLength i ≤ T.maxPathLength :=
   Finset.le_sup (Finset.mem_univ i)
 
 open scoped BigOperators
@@ -382,7 +386,7 @@ def induced (s : Finset V) : ColoredTournament s :=
     fun a b hne => T.total a.val b.val (fun h => hne (Subtype.ext h)),
     fun a b => T.asymm a.val b.val⟩
 
-private theorem induced_path_bound (s : Finset V) (i : Fin 3) {n : ℕ}
+theorem induced_path_bound (s : Finset V) (i : Fin 3) {n : ℕ}
     (hb : PathBound (T.avoid i) n) : PathBound ((T.induced s).avoid i) n := by
   intro l hl
   have hmap : DirectedPath (T.avoid i) (l.map Subtype.val) :=

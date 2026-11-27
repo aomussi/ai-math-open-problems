@@ -13,6 +13,15 @@ the exact correspondence with color-avoiding paths when deleting one
 color leaves an acyclic digraph. It also gives consequences for line
 occupancy, pod packings, and monotone partial matrices.
 
+## General three-colored tournaments
+
+Every three-colored tournament on $m$ vertices has a simple directed path
+on at least $m^{1/2+\varepsilon}$ vertices using at most two colors, for
+some absolute $\varepsilon>0$. The [general theorem](lean/Green88/GeneralColorAvoiding.lean)
+and the [proof outline](extensions.md#general-three-colored-tournaments)
+cover arbitrary tournaments, including those where all color deletions
+have directed cycles.
+
 ## Lean 4 formalization
 
 [Source and verification instructions](lean/README.md) accompany the

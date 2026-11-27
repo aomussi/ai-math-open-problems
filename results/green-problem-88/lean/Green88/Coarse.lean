@@ -93,8 +93,8 @@ theorem card_offsets {k : ℕ} {hk : 0 < k} {w r : Fin 3 → ℕ}
       exact ⟨Finset.mem_univ _, by simpa only [Nat.add_sub_of_le hle] using hx⟩,
       Nat.add_sub_of_le hle⟩
 
-theorem occurs_bound {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)
-    {S : Finset (Fin 3 → ℕ)} (hS : PairwiseComparable S) (i : Fin 3) (x : ℕ) :
+theorem occurs_bound_of_sections {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)
+    {S : Finset (Fin 3 → ℕ)} (hS : SectionChains S (fun i => index hk (w i))) (i : Fin 3) (x : ℕ) :
     ((Finset.univ : Finset (Fin 3 → Fin k)).filter
       (fun e => x ∈ projection (cell hk w S e) i)).card ≤ 2 * k := by
   classical
@@ -119,22 +119,10 @@ theorem occurs_bound {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)
     have hpe := (mem_cell.mp hp).2
     have hqf := (mem_cell.mp hq).2
     have hi : e i = f i := by rw [← hpe i, ← hqf i, hpx, hqx]
-    by_cases hpq : p = q
-    · subst q
-      exact funext fun t => (hpe t).symm.trans (hqf t)
-    have chain := section_chain hjl hij hil (hpx.trans hqx.symm)
-      (hS (mem_cell.mp hp).1 (mem_cell.mp hq).1 hpq)
-    have mono (t : Fin 3) : p t ≤ q t → e t ≤ f t := by
-      intro h
-      simpa [hpe, hqf] using index_mono hk (w t) h
-    have mono' (t : Fin 3) : q t ≤ p t → f t ≤ e t := by
-      intro h
-      simpa [hpe, hqf] using index_mono hk (w t) h
     change (e j).val + (e l).val = (f j).val + (f l).val at heq
-    have direction : ((e j).val ≤ (f j).val ∧ (e l).val ≤ (f l).val) ∨
-        ((f j).val ≤ (e j).val ∧ (f l).val ≤ (e l).val) :=
-      chain.elim (fun h => Or.inl ⟨mono j h.1.le, mono l h.2.le⟩)
-        (fun h => Or.inr ⟨mono' j h.1.le, mono' l h.2.le⟩)
+    have direction := hS p (mem_cell.mp hp).1 q (mem_cell.mp hq).1 i j l hjl hij hil
+      (hpx.trans hqx.symm)
+    simp only [hpe, hqf] at direction
     have hje : e j = f j := Fin.ext (by omega)
     have hle : e l = f l := Fin.ext (by omega)
     funext t
@@ -145,9 +133,15 @@ theorem occurs_bound {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)
     have htl := fin3_eq_of_ne hij hti htj hil.symm hjl.symm
     simpa [htl] using hle
 
+theorem occurs_bound {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)
+    {S : Finset (Fin 3 → ℕ)} (hS : PairwiseComparable S) (i : Fin 3) (x : ℕ) :
+    ((Finset.univ : Finset (Fin 3 → Fin k)).filter
+      (fun e => x ∈ projection (cell hk w S e) i)).card ≤ 2 * k :=
+  occurs_bound_of_sections hk w (sectionChains_of_comparable hS (fun i => index_mono hk (w i))) i x
+
 /-- Bound the total size of the projections along any one axis. -/
-theorem sum_projection_bound {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)
-    {r : Fin 3 → ℕ} {S : Finset (Fin 3 → ℕ)} (hS : PairwiseComparable S)
+theorem sum_projection_bound_of_sections {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)
+    {r : Fin 3 → ℕ} {S : Finset (Fin 3 → ℕ)} (hS : SectionChains S (fun i => index hk (w i)))
     (hr : InRectangle r S) (i : Fin 3) :
     (∑ e : Fin 3 → Fin k, ((projection (cell hk w S e) i).card : ℝ)) ≤
       (r i : ℝ) * (2 * k) := by
@@ -165,8 +159,15 @@ theorem sum_projection_bound {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)
   rw [sum_filter_card_comm _ _ P]
   calc
     _ ≤ ∑ _x ∈ Finset.range (r i), ((2 * k : ℕ) : ℝ) :=
-      Finset.sum_le_sum fun x _ => by exact_mod_cast occurs_bound hk w hS i x
+      Finset.sum_le_sum fun x _ => by exact_mod_cast occurs_bound_of_sections hk w hS i x
     _ = _ := by simp [nsmul_eq_mul]
+
+theorem sum_projection_bound {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)
+    {r : Fin 3 → ℕ} {S : Finset (Fin 3 → ℕ)} (hS : PairwiseComparable S)
+    (hr : InRectangle r S) (i : Fin 3) :
+    (∑ e : Fin 3 → Fin k, ((projection (cell hk w S e) i).card : ℝ)) ≤ (r i : ℝ) * (2 * k) :=
+  sum_projection_bound_of_sections hk w
+    (sectionChains_of_comparable hS (fun i => index_mono hk (w i))) hr i
 
 /-- All points in a specified collection of coarse boxes. -/
 def bunch {k : ℕ} (hk : 0 < k) (w : Fin 3 → ℕ)

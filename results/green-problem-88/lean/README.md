@@ -27,6 +27,10 @@ The project also formalizes these extensions.
 | [`Green88.ColoredTournament.rectangular_path_power`](Green88/ColorAvoiding.lean) | In this class, a tournament on $m$ vertices with longest path lengths $L_i$ in the three color deletions satisfies $m\le (L_0L_1L_2)^\theta$. |
 | [`Green88.ColoredTournament.color_avoiding_power`](Green88/ColorAvoiding.lean) | In the same class, $\max_i L_i\ge m^{1/(2-\delta)}$. |
 | [`Green88.ColoredTournament.partition_path_power`](Green88/ColorAvoiding.lean) | If one color deletion admits a partition into $b$ induced acyclic parts, $m\le b(\max_i L_i)^{2-\delta}$. |
+| [`Green88.ColoredTournament.general_path_bound`](Green88/GeneralColorAvoiding.lean) | For some absolute $\gamma>0$ every three-colored tournament satisfies $m\le 3000(\max_i L_i)^{2-\gamma}$. |
+| [`Green88.ColoredTournament.general_color_avoiding_power`](Green88/GeneralColorAvoiding.lean) | For some absolute $\varepsilon>0$ every three-colored tournament of order $m\ge1$ has a simple directed path on at least $m^{1/2+\varepsilon}$ vertices avoiding one color. |
+
+The last two results apply to arbitrary three-colored tournaments.
 
 Paths are simple and their lengths count vertices. The three colors are
 indexed by `Fin 3`. The rectangular bounds use zero-based coordinates with
@@ -44,9 +48,10 @@ lake env lean Green88/Theorem.lean
 lake env lean Green88/Modular.lean
 lake env lean Green88/HigherDimension.lean
 lake env lean Green88/ColorAvoiding.lean
+lake env lean Green88/GeneralColorAvoiding.lean
 ```
 
-The four `lake env lean` commands print the axiom dependencies.
+The `lake env lean` commands print the axiom dependencies.
 
 ```text
 'Green88.rectangular_exponent' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -59,6 +64,8 @@ The four `lake env lean` commands print the axiom dependencies.
 'Green88.ColoredTournament.rectangular_path_power' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Green88.ColoredTournament.color_avoiding_power' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Green88.ColoredTournament.partition_path_power' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Green88.ColoredTournament.general_path_bound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Green88.ColoredTournament.general_color_avoiding_power' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 These are Lean's standard axioms. The grid proof uses Mathlib's triangle
@@ -76,7 +83,8 @@ lake exe cache get \
   Mathlib.Tactic.FieldSimp Mathlib.Order.Interval.Finset.Nat \
   Mathlib.Data.Nat.Prime.Basic Mathlib.Data.ZMod.Basic \
   Mathlib.Data.Fintype.Order Mathlib.Data.Fin.VecNotation \
-  Mathlib.Data.List.Chain Mathlib.Algebra.Order.BigOperators.Group.Finset
+  Mathlib.Data.List.Chain Mathlib.Data.Fintype.Option \
+  Mathlib.Algebra.Order.BigOperators.Group.Finset
 ```
 
 If the native cache executable fails to launch on macOS, use Lake's
@@ -91,7 +99,8 @@ lake env lean --run .lake/packages/mathlib/Cache/Main.lean get \
   Mathlib.Tactic.FieldSimp Mathlib.Order.Interval.Finset.Nat \
   Mathlib.Data.Nat.Prime.Basic Mathlib.Data.ZMod.Basic \
   Mathlib.Data.Fintype.Order Mathlib.Data.Fin.VecNotation \
-  Mathlib.Data.List.Chain Mathlib.Algebra.Order.BigOperators.Group.Finset
+  Mathlib.Data.List.Chain Mathlib.Data.Fintype.Option \
+  Mathlib.Algebra.Order.BigOperators.Group.Finset
 ```
 
 ## Reading the proof
@@ -110,7 +119,11 @@ lake env lean --run .lake/packages/mathlib/Cache/Main.lean get \
 | [Theorem.lean](Green88/Theorem.lean) | The cubical and rectangular grid bounds |
 | [HigherDimension.lean](Green88/HigherDimension.lean) | Fixed-coordinate fibers and projection onto three coordinates |
 | [DirectedPaths.lean](Green88/DirectedPaths.lean) | Longest simple paths, acyclic extensions, and directed Hamilton paths in tournaments |
-| [ColorAvoiding.lean](Green88/ColorAvoiding.lean) | The height embedding, the converse grid construction, and the bounds for color-avoiding paths |
+| [ColorAvoiding.lean](Green88/ColorAvoiding.lean) | The height embedding, the converse grid construction, and the bounds with an acyclicity assumption |
+| [DepthFirst.lean](Green88/DepthFirst.lean), [BlockCliques.lean](Green88/BlockCliques.lean) | Ordered blocks and the size bound for selected monochromatic sets |
+| [TournamentGrid.lean](Green88/TournamentGrid.lean) | Heights for an arbitrary tournament and the bound on ordered incomparable pairs |
+| [SparseGrid.lean](Green88/SparseGrid.lean), [GridCleaning.lean](Green88/GridCleaning.lean), [GridPower.lean](Green88/GridPower.lean) | Counting with coarse section chains, discarding defects, and deriving the power bound |
+| [TournamentStrict.lean](Green88/TournamentStrict.lean), [GeneralColorAvoiding.lean](Green88/GeneralColorAvoiding.lean) | The strict square-root estimate at small orders and the unconditional path theorem |
 | [Modular.lean](Green88/Modular.lean) | The forbidden difference condition, injective projection, and attaining plane for the modular theorem |
 
 The proof follows the manuscript's rectangular induction and tensor

@@ -50,13 +50,11 @@ theorem rectangular_exponent :
   obtain ⟨θ, hθ, hθ', hpow⟩ := exists_exponent hLk
   exact ⟨θ, hθ, hθ', remove_rectangular_prefactor (rectangular hk hθ hθ' hpow hC hCsmall)⟩
 
-/-- Ben Green's Problem 88. The exponent saving is uniform over all sizes and sets. -/
-theorem green_88 :
-    ∃ δ > (0 : ℝ), ∀ (N : ℕ) (S : Finset (Fin 3 → Fin N)),
-      PairwiseComparable S → (S.card : ℝ) ≤ (N : ℝ) ^ (2 - δ) := by
-  obtain ⟨θ, _, hθ', hbound⟩ := rectangular_exponent
-  refine ⟨2 - 3 * θ, by linarith, ?_⟩
-  intro n S hS
+theorem cube_power_of_rectangle {θ : ℝ}
+    (hbound : ∀ r (S : Finset (Fin 3 → ℕ)), PairwiseComparable S → InRectangle r S →
+      (S.card : ℝ) ≤ (volume r : ℝ) ^ θ)
+    (n : ℕ) (S : Finset (Fin 3 → Fin n)) (hS : PairwiseComparable S) :
+    (S.card : ℝ) ≤ (n : ℝ) ^ (3 * θ) := by
   let T := S.map (castTriple n)
   have hRect : InRectangle (fun _ => n) T := by
     intro x hx i
@@ -66,7 +64,15 @@ theorem green_88 :
   change ((S.map (castTriple n)).card : ℝ) ≤ (volume (fun _ => n) : ℝ) ^ θ at h
   rw [Finset.card_map, volume_cast, Finset.prod_const, Finset.card_univ, Fintype.card_fin,
     ← Real.rpow_natCast_mul (Nat.cast_nonneg n), Nat.cast_ofNat] at h
-  simpa only [show 2 - (2 - 3 * θ) = 3 * θ by ring] using h
+  exact h
+
+/-- Ben Green's Problem 88. The exponent saving is uniform over all sizes and sets. -/
+theorem green_88 :
+    ∃ δ > (0 : ℝ), ∀ (N : ℕ) (S : Finset (Fin 3 → Fin N)),
+      PairwiseComparable S → (S.card : ℝ) ≤ (N : ℝ) ^ (2 - δ) := by
+  obtain ⟨θ, _, hθ', hbound⟩ := rectangular_exponent
+  refine ⟨2 - 3 * θ, by linarith, ?_⟩
+  simpa only [show 2 - (2 - 3 * θ) = 3 * θ by ring] using cube_power_of_rectangle hbound
 
 #print axioms rectangular_exponent
 #print axioms green_88

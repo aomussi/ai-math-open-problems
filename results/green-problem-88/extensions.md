@@ -71,4 +71,33 @@ Now label a vertex by $(h_1,h_2,h_3)$. If two vertices have equal $h_1$, their p
 
 Conversely, take a 2-comparable set in $[n_1]\times[n_2]\times[n_3]$. Orient each edge toward the point larger in at least two coordinates and color it by the sole coordinate failing to increase, with any color allowed when all three increase. This is the construction from [Fox, Sudakov and Wigderson, equation (3)](https://arxiv.org/html/2512.10438v2#S1.SS2). Each $D_i$ is acyclic and its paths have at most $n_i$ vertices, proving equality of the maxima.
 
-If some $D_i$ can instead be partitioned into $b$ acyclic induced parts, applying the proposition to each induced subtournament gives $m\le bG(L)\le bL^{2-\delta}$, where $L=\max_iL_i$. This argument leaves the unrestricted three-color path problem open.
+If some $D_i$ can instead be partitioned into $b$ acyclic induced parts, applying the proposition to each induced subtournament gives $m\le bG(L)\le bL^{2-\delta}$, where $L=\max_iL_i$.
+
+## General three-colored tournaments
+
+For an arbitrary $m$-vertex tournament with three edge colors, let $L$ be
+the largest vertex count of a simple path avoiding some color. There is
+an absolute $\varepsilon>0$ with $L\ge m^{1/2+\varepsilon}$ for every
+$m\ge1$. The theorem has no acyclicity assumption on the color deletions.
+
+The proof uses the grid bound $G(n)\le n^{2-\delta}$ with
+$0<\delta\le 1/2$. Depth-first search gives ordered blocks of size at
+most $12L$ for each color deletion, with all interblock edges pointing
+in a common direction. At least $3m/4$ vertices can be retained for all
+three colors at once. Heights in maximal acyclic spanning subgraphs that
+contain those edges give triples in $[L]^3$ with injective two-coordinate
+projections. A block lemma bounds the number of ordered incomparable
+pairs by $72L\,G(L)$.
+
+Delete the sparse cells of each fixed-coordinate section and the
+sections with inversions between dense cells. The remaining coarse
+sections are weak chains. The projection and sampling argument for
+comparable triples then bounds the remaining set. Choosing
+$k=\lfloor L^{\delta/16}\rfloor$ coarse intervals and density threshold
+$t=\lceil L^{1-\delta/4}\rceil$ yields
+$m\le 3000L^{2-\delta^2/96}$. A separate strict bound $m<L^2$ when
+$m>1$ absorbs the prefactor into a smaller exponent, giving the
+coefficient-one lower bound.
+
+[Lean 4 theorem and axiom audit](lean/Green88/GeneralColorAvoiding.lean) ·
+[Build and verification commands](lean/README.md).
