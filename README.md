@@ -26,7 +26,7 @@ The result pages distinguish mathematical arguments from the computational check
 | [Real rank of ternary quartics](results/codex-058/README.md) | Counterexample to Michałek et al.'s description of the algebraic boundary for real rank six |
 | [2-annihilation games](results/codex-068/README.md) | A polynomial-time win, loss and draw classification |
 | [Geodesic convexity in orthant spaces](results/codex-077/README.md) | A nonclosed three-point geodesic convex hull |
-| [Green's Problem 88](results/codex-084/README.md) | A fixed power saving for 2-comparable subsets of the three-dimensional grid, with a [Lean 4 formalization](results/codex-084/lean/README.md) |
+| [Green's Problem 88](results/codex-084/README.md) | A fixed power saving for 2-comparable triples and the exact modular maximum. [Lean 4 proofs](results/codex-084/lean/README.md) and [extensions](results/codex-084/extensions.md) |
 | [Butson Hadamard matrices](results/claude-001/README.md) | An explicit BH(46,6) construction |
 
 ## Reproduction

@@ -9,6 +9,13 @@ In the Lean statement, `Fin N` indexes the $N$ coordinate values, and
 in the same direction. This is the relation used in the problem statement
 and in the Formal Conjectures entry.
 
+The modular theorem `Green88.modular_prime_exact` gives the exact maximum
+$p^2$ for each odd prime $p$, under Green's forbidden difference condition
+in $\mathbb F_p^3$. The theorem `Green88.modular_exact` holds for every
+positive odd modulus. Each theorem includes the upper bound and an
+attaining set of size $p^2$. The [companion note](../extensions.md) gives
+the mathematical proof and the further extensions.
+
 ## Verification
 
 This project pins Lean 4.19.0 and Mathlib v4.19.0. With Elan and Git
@@ -18,15 +25,18 @@ installed, run the following from the repository root.
 cd results/codex-084/lean
 lake build Green88
 lake env lean Green88/Theorem.lean
+lake env lean Green88/Modular.lean
 ```
 
-The second command prints the axiom dependencies of the main theorem.
+The last two commands print the axiom dependencies of the grid and modular theorems.
 
 ```text
 'Green88.green_88' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Green88.modular_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Green88.modular_prime_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
-These are Lean's standard axioms. The proof uses Mathlib's triangle
+These are Lean's standard axioms. The grid proof uses Mathlib's triangle
 removal lemma and derives the qualitative upper bound for 2-comparable
 sets within this project.
 
@@ -38,7 +48,8 @@ lake exe cache get \
   Mathlib.Combinatorics.SimpleGraph.Triangle.Removal \
   Mathlib.Analysis.MeanInequalities \
   Mathlib.Tactic.FinCases Mathlib.Tactic.Ring Mathlib.Tactic.Linarith \
-  Mathlib.Tactic.FieldSimp Mathlib.Order.Interval.Finset.Nat
+  Mathlib.Tactic.FieldSimp Mathlib.Order.Interval.Finset.Nat \
+  Mathlib.Data.Nat.Prime.Basic Mathlib.Data.ZMod.Basic
 ```
 
 If the native cache executable fails to launch on macOS, use Lake's
@@ -50,7 +61,8 @@ lake env lean --run .lake/packages/mathlib/Cache/Main.lean get \
   Mathlib.Combinatorics.SimpleGraph.Triangle.Removal \
   Mathlib.Analysis.MeanInequalities \
   Mathlib.Tactic.FinCases Mathlib.Tactic.Ring Mathlib.Tactic.Linarith \
-  Mathlib.Tactic.FieldSimp Mathlib.Order.Interval.Finset.Nat
+  Mathlib.Tactic.FieldSimp Mathlib.Order.Interval.Finset.Nat \
+  Mathlib.Data.Nat.Prime.Basic Mathlib.Data.ZMod.Basic
 ```
 
 ## Reading the proof
@@ -66,7 +78,8 @@ lake env lean --run .lake/packages/mathlib/Cache/Main.lean get \
 | [Budget.lean](Green88/Budget.lean) | Removal of groups on long lines and the arithmetic–geometric mean inequality for projection ratios |
 | [Power.lean](Green88/Power.lean), [Induction.lean](Green88/Induction.lean) | The numerical inequalities and strong induction on rectangular volume |
 | [Tensor.lean](Green88/Tensor.lean) | Lexicographic products and removal of the factor 2 |
-| [Theorem.lean](Green88/Theorem.lean) | The final theorem and axiom audit |
+| [Theorem.lean](Green88/Theorem.lean) | The final grid theorem and axiom audit |
+| [Modular.lean](Green88/Modular.lean) | The forbidden difference condition, injective projection, and attaining plane for the modular theorem |
 
 The proof follows the manuscript's rectangular induction and tensor
 argument. Each axis uses blocks of width $\lfloor r/k\rfloor+1$,

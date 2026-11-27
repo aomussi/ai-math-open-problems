@@ -4,14 +4,25 @@
 
 Write $M(r,s,t)$ for the maximum over $[r]\times[s]\times[t]$, and $G(n)=M(n,n,n)$. Gowers and Long's Proposition 1.10 gives $G(n)=o(n^2)$. Fixed-coordinate sections form strict chains in the other two coordinates. Each two-coordinate projection is injective. [Green, Problem 88](https://people.maths.ox.ac.uk/greenbj/papers/open-problems.pdf#page=42) · [Gowers and Long, Proposition 1.10](https://arxiv.org/html/1609.08688#S1.SS2)
 
+## Modular question and extensions
+
+The maximum in Green's modular question is exactly $p^2$ for every odd
+prime $p$. The [extension note](extensions.md) gives the construction and
+upper bound, the same exponent saving in higher-dimensional grids, and
+the exact correspondence with color-avoiding paths when deleting one
+color leaves an acyclic digraph. It also gives consequences for line
+occupancy, pod packings, and monotone partial matrices.
+
 ## Lean 4 formalization
 
 [Source and verification instructions](lean/README.md) accompany the
 written proof. The theorem [`Green88.green_88`](lean/Green88/Theorem.lean)
 proves the full power saving, including the qualitative bound from
 Mathlib's triangle removal lemma, the rectangular induction, and
-removal of the leading constant. The project pins Lean 4.19.0 and
-Mathlib v4.19.0.
+removal of the leading constant. The theorem
+[`Green88.modular_exact`](lean/Green88/Modular.lean) proves the sharp
+modular bound and its attainment for every positive odd modulus. The
+project pins Lean 4.19.0 and Mathlib v4.19.0.
 
 ## Rectangular induction
 
