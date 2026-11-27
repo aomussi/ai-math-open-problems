@@ -4,6 +4,15 @@
 
 Write $M(r,s,t)$ for the maximum over $[r]\times[s]\times[t]$, and $G(n)=M(n,n,n)$. Gowers and Long's Proposition 1.10 gives $G(n)=o(n^2)$. Fixed-coordinate sections form strict chains in the other two coordinates. Each two-coordinate projection is injective. [Green, Problem 88](https://people.maths.ox.ac.uk/greenbj/papers/open-problems.pdf#page=42) · [Gowers and Long, Proposition 1.10](https://arxiv.org/html/1609.08688#S1.SS2)
 
+## Lean 4 formalization
+
+[Source and verification instructions](lean/README.md) accompany the
+written proof. The theorem [`Green88.green_88`](lean/Green88/Theorem.lean)
+proves the full power saving, including the qualitative bound from
+Mathlib's triangle removal lemma, the rectangular induction, and
+removal of the leading constant. The project pins Lean 4.19.0 and
+Mathlib v4.19.0.
+
 ## Rectangular induction
 
 Take $\eta=2^{-36}$, $L=2^{54}$ and choose a fixed $k\ge L$ so that $(3L/\eta)G(k)\le k^2/32$. Put $\delta=\log 2/\log k$ and $\theta=(2-\delta)/3$. Thus $1/2\le\theta<2/3$, $k^{2-3\theta}=2$,
